@@ -12,12 +12,61 @@ const rings = 35;
 let heartVertices = [];
 let heartColors = [];
 
+// 핑크 도트 비
+let pinkDots = [];
+const dotCount = 100;
+
 function setup() {
   createCanvas(260, 200, WEBGL);
   noStroke();
 
   randomSeed(12);
   buildHeart();
+  createPinkRain();
+}
+
+function createPinkRain() {
+  pinkDots = [];
+
+  for (let i = 0; i < dotCount; i++) {
+    pinkDots.push({
+      x: random(-width / 2, width / 2),
+      y: random(-height / 2, height / 2),
+      z: random(-70, 30),
+      size: random(1, 2.8),
+      speed: random(0.5, 1.8),
+      alpha: random(100, 220)
+    });
+  }
+}
+
+function drawPinkRain() {
+  push();
+
+  // 도트는 하트 뒤쪽 배경에 배치
+  for (let dot of pinkDots) {
+    push();
+    translate(dot.x, dot.y, -65);
+
+    noStroke();
+    fill(255, 105, 180, dot.alpha);
+    sphere(dot.size, 5, 4);
+
+    pop();
+
+    // 아래 방향으로 낙하
+    dot.y += dot.speed;
+
+    // 화면 아래로 나가면 위에서 다시 시작
+    if (dot.y > height / 2 + 5) {
+      dot.y = -height / 2 - random(0, 30);
+      dot.x = random(-width / 2, width / 2);
+      dot.size = random(1, 2.8);
+      dot.speed = random(0.5, 1.8);
+    }
+  }
+
+  pop();
 }
 
 function buildHeart() {
@@ -60,7 +109,7 @@ function buildHeart() {
       rowFront.push([px, py, depth]);
       rowBack.push([px, py, -depth]);
 
-      // 하트 중앙에 가로로 얇은 하얀 영역
+      // 하트 중앙의 얇은 하얀 영역
       let horizontalBand =
         abs(py - 5) < 7 &&
         abs(px) < 31;
@@ -110,6 +159,9 @@ function drawHeartSurface(side) {
 function draw() {
   background(255);
 
+  // 배경 핑크 도트 비
+  drawPinkRain();
+
   // 자동 회전
   if (!isDragging) {
     rotY += 0.02;
@@ -154,4 +206,5 @@ function mouseReleased() {
 
 function windowResized() {
   resizeCanvas(260, 200);
+  createPinkRain();
 }
